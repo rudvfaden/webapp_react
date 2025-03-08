@@ -25,6 +25,7 @@ app.add_middleware(
 conn = sqlite3.connect('database.db', check_same_thread=False)
 cursor = conn.cursor()
 
+
 def create_tables_and_insert_data():
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS table_of_tables (
