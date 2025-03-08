@@ -1,5 +1,8 @@
-### Get all fruits
-GET http://localhost:8000/fruits
+### Get all tables
+GET http://localhost:8000/tables
+
+### Get all columns
+GET  http://localhost:8000/columns/example_table
 
 ### Add a new fruit
 POST http://localhost:8000/fruits
