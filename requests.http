@@ -1,16 +1,19 @@
 ### Get all tables
 GET http://localhost:8000/tables
 
-### Get all columns
-GET  http://localhost:8000/columns/example_table
+### Get all columns kunde_Tabel
+GET  http://localhost:8000/columns/Kunde_tabel
 
-### Add a new fruit
+### Get all columns items_tabel
+GET  http://localhost:8000/columns/Items_tabel
+
+### Add a new table
 POST http://localhost:8000/tables
 Content-Type: application/json
 
-    {
-        "table_name": "tabel 1",
-        "description": "This is a test table",
-    }
+{
+    "table_name": "table_1",
+    "description": "This is a test table"
+}
 
 
