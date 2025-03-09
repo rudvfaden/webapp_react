@@ -1,9 +1,11 @@
 import uvicorn
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import List
+from typing import List, Callable
 import sqlite3
+import os
+from contextlib import contextmanager
 
 app = FastAPI()
 
@@ -21,37 +23,58 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Database connection
-conn = sqlite3.connect('database/database.db', check_same_thread=False)
-cursor = conn.cursor()
+# Ensure database directory exists
+os.makedirs('database', exist_ok=True)
+
+# Database connection management
+DB_PATH = 'database/database.db'
+
+@contextmanager
+def get_db_connection():
+    connection = None
+    try:
+        connection = sqlite3.connect(DB_PATH)
+        connection.row_factory = sqlite3.Row
+        yield connection
+    finally:
+        if connection:
+            connection.close()
+
+def get_db_cursor():
+    with get_db_connection() as connection:
+        cursor = connection.cursor()
+        yield cursor
+        connection.commit()
 
 
 def create_tables_and_insert_data():
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS table_of_tables (
-        table_name TEXT PRIMARY KEY,
-        description TEXT
-    )
-    """)
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS table_of_columns (
-        table_name TEXT,
-        column_name TEXT,
-        description TEXT,
-        PRIMARY KEY (table_name, column_name),
-        FOREIGN KEY (table_name) REFERENCES table_of_tables(table_name)
-    )
-    """)
-    cursor.execute("""
-    INSERT OR IGNORE INTO table_of_tables (table_name, description) \
-        VALUES ('example_table', 'An example table')
-    """)
-    cursor.execute("""
-    INSERT OR IGNORE INTO table_of_columns (table_name, column_name,\
-        description) VALUES ('example_table', 'example_column',\
-            'An example column')
-    """)
-    conn.commit()
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS table_of_tables (
+            table_name TEXT PRIMARY KEY,
+            description TEXT
+        )
+        """)
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS table_of_columns (
+            table_name TEXT,
+            column_name TEXT,
+            description TEXT,
+            PRIMARY KEY (table_name, column_name),
+            FOREIGN KEY (table_name) REFERENCES table_of_tables(table_name)
+        )
+        """)
+        cursor.execute("""
+        INSERT OR IGNORE INTO table_of_tables (table_name, description) \
+            VALUES ('example_table', 'An example table')
+        """)
+        cursor.execute("""
+        INSERT OR IGNORE INTO table_of_columns (table_name, column_name,\
+            description) VALUES ('example_table', 'example_column',\
+                'An example column')
+        """)
+        conn.commit()
 
 
 class TableDescription(BaseModel):
@@ -72,43 +95,51 @@ def on_startup():
 
 @app.get("/tables", response_model=List[TableDescription])
 def get_tables():
-    cursor.execute("SELECT table_name, description FROM table_of_tables")
-    tables = cursor.fetchall()
-    return [TableDescription(table_name=row[0], 
-                             description=row[1]) for row in tables]
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT table_name, description FROM table_of_tables")
+        tables = cursor.fetchall()
+        return [TableDescription(table_name=row[0], 
+                                description=row[1]) for row in tables]
 
 
 @app.get("/columns/{table_name}", response_model=List[ColumnDescription])
 def get_columns(table_name: str):
-    cursor.execute(
-        "SELECT column_name, description FROM table_of_columns\
-            WHERE table_name = ?", (table_name,))
-    columns = cursor.fetchall()
-    return [ColumnDescription(table_name=table_name, column_name=row[0],
-            description=row[1]) for row in columns]
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT column_name, description FROM table_of_columns\
+                WHERE table_name = ?", (table_name,))
+        columns = cursor.fetchall()
+        return [ColumnDescription(table_name=table_name, column_name=row[0],
+                description=row[1]) for row in columns]
 
 
 @app.post("/tables", response_model=TableDescription)
 def update_table_description(table_desc: TableDescription):
-    cursor.execute("UPDATE table_of_tables SET description = ?\
-        WHERE table_name = ?",
-                   (table_desc.description, table_desc.table_name))
-    conn.commit()
-    if cursor.rowcount == 0:
-        raise HTTPException(status_code=404, detail="Table not found")
-    return table_desc
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("UPDATE table_of_tables SET description = ?\
+            WHERE table_name = ?",
+                    (table_desc.description, table_desc.table_name))
+        conn.commit()
+        if cursor.rowcount == 0:
+            raise HTTPException(status_code=404, detail="Table not found")
+        return table_desc
 
 
 @app.post("/columns", response_model=ColumnDescription)
 def update_column_description(column_desc: ColumnDescription):
-    cursor.execute("UPDATE table_of_columns SET description = ? \
-        WHERE table_name = ? AND column_name = ?",
-                   (column_desc.description, column_desc.table_name,
-                       column_desc.column_name))
-    conn.commit()
-    if cursor.rowcount == 0:
-        raise HTTPException(status_code=404, detail="Column not found")
-    return column_desc
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("UPDATE table_of_columns SET description = ? \
+            WHERE table_name = ? AND column_name = ?",
+                    (column_desc.description, column_desc.table_name,
+                        column_desc.column_name))
+        conn.commit()
+        if cursor.rowcount == 0:
+            raise HTTPException(status_code=404, detail="Column not found")
+        return column_desc
 
 
 if __name__ == "__main__":

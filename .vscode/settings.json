@@ -10,7 +10,7 @@
             "previewLimit": 50,
             "driver": "SQLite",
             "name": "tabeller",
-            "database": "${workspaceFolder:webapp_react}/database.db"
+            "database": "${workspaceFolder:webapp_react}/database/database.db"
         }
     ]
 }

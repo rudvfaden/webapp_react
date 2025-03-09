@@ -2,7 +2,7 @@
 GET http://localhost:8000/tables
 
 ### Get all columns kunde_Tabel
-GET  http://localhost:8000/columns/Kunde_tabel
+GET  http://localhost:8000/tables
 
 ### Get all columns items_tabel
 GET  http://localhost:8000/columns/Items_tabel
@@ -12,7 +12,7 @@ POST http://localhost:8000/tables
 Content-Type: application/json
 
 {
-    "table_name": "example_table",
+    "table_name": "Bruger_tabel",
     "description": "This is a test table"
 }
 
