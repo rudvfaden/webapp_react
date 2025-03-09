@@ -5,11 +5,12 @@ GET http://localhost:8000/tables
 GET  http://localhost:8000/columns/example_table
 
 ### Add a new fruit
-POST http://localhost:8000/fruits
+POST http://localhost:8000/tables
 Content-Type: application/json
 
     {
-        "name": "banana"
+        "table_name": "tabel 1",
+        "description": "This is a test table",
     }
 
 

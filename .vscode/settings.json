@@ -1,0 +1,16 @@
+{
+    "python.testing.pytestArgs": [
+        "backend"
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true,
+    "sqltools.useNodeRuntime": true,
+    "sqltools.connections": [
+        {
+            "previewLimit": 50,
+            "driver": "SQLite",
+            "name": "tabeller",
+            "database": "${workspaceFolder:webapp_react}/database.db"
+        }
+    ]
+}

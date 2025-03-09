@@ -43,10 +43,13 @@ def create_tables_and_insert_data():
     )
     """)
     cursor.execute("""
-    INSERT OR IGNORE INTO table_of_tables (table_name, description) VALUES ('example_table', 'An example table')
+    INSERT OR IGNORE INTO table_of_tables (table_name, description) \
+        VALUES ('example_table', 'An example table')
     """)
     cursor.execute("""
-    INSERT OR IGNORE INTO table_of_columns (table_name, column_name, description) VALUES ('example_table', 'example_column', 'An example column')
+    INSERT OR IGNORE INTO table_of_columns (table_name, column_name,\
+        description) VALUES ('example_table', 'example_column',\
+            'An example column')
     """)
     conn.commit()
 
@@ -71,20 +74,24 @@ def on_startup():
 def get_tables():
     cursor.execute("SELECT table_name, description FROM table_of_tables")
     tables = cursor.fetchall()
-    return [TableDescription(table_name=row[0], description=row[1]) for row in tables]
+    return [TableDescription(table_name=row[0], 
+                             description=row[1]) for row in tables]
 
 
 @app.get("/columns/{table_name}", response_model=List[ColumnDescription])
 def get_columns(table_name: str):
     cursor.execute(
-        "SELECT column_name, description FROM table_of_columns WHERE table_name = ?", (table_name,))
+        "SELECT column_name, description FROM table_of_columns\
+            WHERE table_name = ?", (table_name,))
     columns = cursor.fetchall()
-    return [ColumnDescription(table_name=table_name, column_name=row[0], description=row[1]) for row in columns]
+    return [ColumnDescription(table_name=table_name, column_name=row[0],
+            description=row[1]) for row in columns]
 
 
 @app.post("/tables", response_model=TableDescription)
 def update_table_description(table_desc: TableDescription):
-    cursor.execute("UPDATE table_of_tables SET description = ? WHERE table_name = ?",
+    cursor.execute("UPDATE table_of_tables SET description = ?\
+        WHERE table_name = ?",
                    (table_desc.description, table_desc.table_name))
     conn.commit()
     if cursor.rowcount == 0:
@@ -94,8 +101,10 @@ def update_table_description(table_desc: TableDescription):
 
 @app.post("/columns", response_model=ColumnDescription)
 def update_column_description(column_desc: ColumnDescription):
-    cursor.execute("UPDATE table_of_columns SET description = ? WHERE table_name = ? AND column_name = ?",
-                   (column_desc.description, column_desc.table_name, column_desc.column_name))
+    cursor.execute("UPDATE table_of_columns SET description = ? \
+        WHERE table_name = ? AND column_name = ?",
+                   (column_desc.description, column_desc.table_name,
+                       column_desc.column_name))
     conn.commit()
     if cursor.rowcount == 0:
         raise HTTPException(status_code=404, detail="Column not found")
