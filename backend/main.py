@@ -27,7 +27,7 @@ app.add_middleware(
 os.makedirs('database', exist_ok=True)
 
 # Database connection management
-DB_PATH = 'database/database.db'
+DB_PATH = '../database/database.db'
 
 @contextmanager
 def get_db_connection():
