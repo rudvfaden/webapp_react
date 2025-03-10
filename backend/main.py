@@ -1,8 +1,8 @@
 import uvicorn
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import List, Callable
+from typing import List
 import sqlite3
 import os
 from contextlib import contextmanager
@@ -29,6 +29,7 @@ os.makedirs('database', exist_ok=True)
 # Database connection management
 DB_PATH = '../database/database.db'
 
+
 @contextmanager
 def get_db_connection():
     connection = None
@@ -39,6 +40,7 @@ def get_db_connection():
     finally:
         if connection:
             connection.close()
+
 
 def get_db_cursor():
     with get_db_connection() as connection:
@@ -99,8 +101,8 @@ def get_tables():
         cursor = conn.cursor()
         cursor.execute("SELECT table_name, description FROM table_of_tables")
         tables = cursor.fetchall()
-        return [TableDescription(table_name=row[0], 
-                                description=row[1]) for row in tables]
+        return [TableDescription(table_name=row[0],
+                                 description=row[1]) for row in tables]
 
 
 @app.get("/columns/{table_name}", response_model=List[ColumnDescription])
@@ -121,7 +123,7 @@ def update_table_description(table_desc: TableDescription):
         cursor = conn.cursor()
         cursor.execute("UPDATE table_of_tables SET description = ?\
             WHERE table_name = ?",
-                    (table_desc.description, table_desc.table_name))
+                       (table_desc.description, table_desc.table_name))
         conn.commit()
         if cursor.rowcount == 0:
             raise HTTPException(status_code=404, detail="Table not found")
@@ -134,7 +136,7 @@ def update_column_description(column_desc: ColumnDescription):
         cursor = conn.cursor()
         cursor.execute("UPDATE table_of_columns SET description = ? \
             WHERE table_name = ? AND column_name = ?",
-                    (column_desc.description, column_desc.table_name,
+                       (column_desc.description, column_desc.table_name,
                         column_desc.column_name))
         conn.commit()
         if cursor.rowcount == 0:
