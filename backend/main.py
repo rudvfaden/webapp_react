@@ -23,11 +23,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 # Ensure database directory exists
 os.makedirs('database', exist_ok=True)
 
 # Database connection management
-DB_PATH = '../database/database.db'
+DB_PATH = os.path.join('database', 'database.db')
 
 
 @contextmanager
