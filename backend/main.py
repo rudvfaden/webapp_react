@@ -1,7 +1,8 @@
 import uvicorn
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from typing import Annotated
+from pydantic import BaseModel, StringConstraints
 from typing import List
 import sqlite3
 import os
@@ -25,10 +26,13 @@ app.add_middleware(
 
 
 # Ensure database directory exists
-os.makedirs('../database', exist_ok=True)
+# Get the directory of the current file
+ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+DATABASE_DIR = os.path.join(ROOT_DIR, 'database')
+os.makedirs(DATABASE_DIR, exist_ok=True)
 
-# Database connection management
-DB_PATH = os.path.join('database', 'database.db')
+# Correctly set the database path
+DB_PATH = os.path.join(DATABASE_DIR, 'database.db')
 
 
 @contextmanager
@@ -81,12 +85,12 @@ def create_tables_and_insert_data():
 
 
 class TableDescription(BaseModel):
-    table_name: str
+    table_name: Annotated[str, StringConstraints(max_length=32)]
     description: str
 
 
 class ColumnDescription(BaseModel):
-    table_name: str
+    table_name: Annotated[str, StringConstraints(max_length=32)]
     column_name: str
     description: str
 
