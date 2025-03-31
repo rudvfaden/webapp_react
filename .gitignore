@@ -40,3 +40,7 @@ ENV/
 env/
 .venv/
 .vercel
+
+
+*.db-shm 
+*.db-wal

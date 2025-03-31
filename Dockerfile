@@ -23,6 +23,10 @@ RUN npm install
 # Copy the rest of the frontend code
 COPY frontend/ ./
 
+# Build the frontend for production
+RUN npm run build
+
+
 # Set working directory back to main app directory
 WORKDIR /app
 

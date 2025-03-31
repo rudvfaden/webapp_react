@@ -10,9 +10,8 @@ CREATE TABLE IF NOT EXISTS table_of_columns (
     column_name VARCHAR(100),
     description TEXT,
     FOREIGN KEY (table_name) REFERENCES table_of_tables(table_name)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE
 );
+
 
 delete from table_of_tables;
 delete from table_of_columns;
@@ -23,7 +22,6 @@ values
 ('Items_tabel', 'description of table 2'),
 ('Adresse_tabel', 'description of table 4');
 
--- run 
 insert into table_of_columns (table_name, column_name, description) 
 values 
 ('Kunde_tabel', 'Kunde_id', 'description of column 1'),

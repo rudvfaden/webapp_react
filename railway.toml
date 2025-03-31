@@ -1,0 +1,17 @@
+[build]
+builder = "dockerfile"
+dockerfile = "Dockerfile"
+
+[deploy]
+strategy = "docker"
+# Use the command from Dockerfile, which will start both nginx and the backend
+restartPolicy = "on-failure"
+
+[volumes.database]
+path = "/app/database"
+mountPath = "/app/database"
+
+# Expose ports to the public internet
+[[ports]]
+port = "8080"
+protocol = "http"
