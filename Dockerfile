@@ -50,4 +50,4 @@ RUN mkdir -p /app/database
 EXPOSE 8080
 
 # Start both nginx and backend service
-CMD ["sh", "-c", "nginx && cd /app/backend && . /app/venv/bin/activate && python main.py"]
+CMD ["sh", "-c", "cd /app/backend && . /app/venv/bin/activate && python main.py & nginx -g 'daemon off;'"]
