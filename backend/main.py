@@ -15,6 +15,9 @@ origins = [
     "http://localhost:5173",
     "http://localhost:8000",  # Add this to match your frontend URL
     "http://localhost:3001",  # New port mapping from docker-compose
+    "https://webapp-production-32d2.up.railway.app",  # Railway domain
+    "http://webapp-production-32d2.up.railway.app",   # HTTP version
+    "*",  # Allow all origins for testing
 ]
 
 app.add_middleware(
@@ -148,6 +151,12 @@ def update_column_description(column_desc: ColumnDescription):
         if cursor.rowcount == 0:
             raise HTTPException(status_code=404, detail="Column not found")
         return column_desc
+
+
+@app.get("/health")
+def health_check():
+    """Health check endpoint for Railway."""
+    return {"status": "ok", "message": "API server is running"}
 
 
 if __name__ == "__main__":

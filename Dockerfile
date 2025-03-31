@@ -10,7 +10,8 @@ RUN apk add --no-cache \
     python3-dev \
     musl-dev \
     linux-headers \
-    build-base
+    build-base \
+    nginx
 
 # Set working directory for the application
 WORKDIR /app
@@ -22,6 +23,12 @@ RUN npm install
 
 # Copy the rest of the frontend code
 COPY frontend/ ./
+
+# Build the frontend for production
+RUN npm run build
+
+# Set up nginx configuration
+COPY nginx.conf /etc/nginx/http.d/default.conf
 
 # Set working directory back to main app directory
 WORKDIR /app
@@ -39,8 +46,8 @@ COPY database/ ./database/
 # Create a directory for the SQLite database if it doesn't exist
 RUN mkdir -p /app/database
 
-# Expose ports for frontend and backend
-EXPOSE 3001 8000
+# Expose port for nginx
+EXPOSE 8080
 
-# Start both frontend and backend services
-CMD ["sh", "-c", "cd /app/frontend && npm run dev -- --host 0.0.0.0 --port 3001 & cd /app/backend && . /app/venv/bin/activate && python main.py"]
+# Start both nginx and backend service
+CMD ["sh", "-c", "nginx && cd /app/backend && . /app/venv/bin/activate && python main.py"]

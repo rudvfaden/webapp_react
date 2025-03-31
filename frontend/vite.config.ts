@@ -29,7 +29,8 @@ export default defineConfig({
     },
     allowedHosts: [
       'localhost',
-      '*.railway.app'
+      '*.railway.app',
+      'webapp-production-32d2.up.railway.app'
     ]
   },
   resolve: {
