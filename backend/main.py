@@ -14,6 +14,7 @@ origins = [
     "http://localhost:3000",  # Existing frontend URL
     "http://localhost:5173",
     "http://localhost:8000",  # Add this to match your frontend URL
+    "http://localhost:3001",  # New port mapping from docker-compose
 ]
 
 app.add_middleware(
